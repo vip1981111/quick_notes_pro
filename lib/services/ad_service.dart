@@ -38,22 +38,12 @@ class AdService {
   }
 
   String get _bannerAdUnitId {
-    if (kDebugMode) {
-      return Platform.isAndroid
-          ? 'ca-app-pub-3940256099942544/6300978111'
-          : 'ca-app-pub-3940256099942544/2934735716';
-    }
     return Platform.isAndroid
         ? AppConstants.bannerAdUnitIdAndroid
         : AppConstants.bannerAdUnitIdIOS;
   }
 
   String get _interstitialAdUnitId {
-    if (kDebugMode) {
-      return Platform.isAndroid
-          ? 'ca-app-pub-3940256099942544/1033173712'
-          : 'ca-app-pub-3940256099942544/4411468910';
-    }
     return Platform.isAndroid
         ? AppConstants.interstitialAdUnitIdAndroid
         : AppConstants.interstitialAdUnitIdIOS;
