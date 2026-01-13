@@ -1,4 +1,4 @@
-package com.mohammedabdullah.quick_notes_pro
+package com.mohammedabdullah.quicknotespro
 
 import io.flutter.embedding.android.FlutterActivity
 

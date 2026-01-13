@@ -13,12 +13,14 @@ class PurchaseService {
 
   bool _isAvailable = false;
   bool _isPremium = false;
-  ProductDetails? _premiumProduct;
+  ProductDetails? _monthlyProduct;
+  ProductDetails? _yearlyProduct;
 
   final _premiumController = StreamController<bool>.broadcast();
   Stream<bool> get premiumStream => _premiumController.stream;
   bool get isPremium => _isPremium;
-  ProductDetails? get premiumProduct => _premiumProduct;
+  ProductDetails? get monthlyProduct => _monthlyProduct;
+  ProductDetails? get yearlyProduct => _yearlyProduct;
 
   Future<void> init() async {
     _isAvailable = await _inAppPurchase.isAvailable();
@@ -37,7 +39,8 @@ class PurchaseService {
 
   Future<void> _loadProducts() async {
     final response = await _inAppPurchase.queryProductDetails({
-      AppConstants.premiumProductId,
+      AppConstants.monthlySubscriptionId,
+      AppConstants.yearlySubscriptionId,
     });
 
     if (response.error != null) {
@@ -45,8 +48,12 @@ class PurchaseService {
       return;
     }
 
-    if (response.productDetails.isNotEmpty) {
-      _premiumProduct = response.productDetails.first;
+    for (final product in response.productDetails) {
+      if (product.id == AppConstants.monthlySubscriptionId) {
+        _monthlyProduct = product;
+      } else if (product.id == AppConstants.yearlySubscriptionId) {
+        _yearlyProduct = product;
+      }
     }
   }
 
@@ -54,7 +61,8 @@ class PurchaseService {
     for (final purchase in purchases) {
       if (purchase.status == PurchaseStatus.purchased ||
           purchase.status == PurchaseStatus.restored) {
-        if (purchase.productID == AppConstants.premiumProductId) {
+        if (purchase.productID == AppConstants.monthlySubscriptionId ||
+            purchase.productID == AppConstants.yearlySubscriptionId) {
           _setPremium(true);
         }
         if (purchase.pendingCompletePurchase) {
@@ -69,9 +77,15 @@ class PurchaseService {
     _premiumController.add(value);
   }
 
-  Future<bool> purchasePremium() async {
-    if (!_isAvailable || _premiumProduct == null) return false;
-    final purchaseParam = PurchaseParam(productDetails: _premiumProduct!);
+  Future<bool> purchaseMonthly() async {
+    if (!_isAvailable || _monthlyProduct == null) return false;
+    final purchaseParam = PurchaseParam(productDetails: _monthlyProduct!);
+    return await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+  }
+
+  Future<bool> purchaseYearly() async {
+    if (!_isAvailable || _yearlyProduct == null) return false;
+    final purchaseParam = PurchaseParam(productDetails: _yearlyProduct!);
     return await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
   }
 

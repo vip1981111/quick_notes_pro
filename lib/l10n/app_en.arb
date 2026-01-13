@@ -41,5 +41,7 @@
   "sortBy": "Sort by",
   "dateCreated": "Date Created",
   "dateModified": "Date Modified",
-  "titleAZ": "Title A-Z"
+  "titleAZ": "Title A-Z",
+  "privacyPolicy": "Privacy Policy",
+  "termsOfService": "Terms of Service"
 }

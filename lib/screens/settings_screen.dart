@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:in_app_review/in_app_review.dart';
 import '../providers/settings_provider.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../utils/constants.dart';
 import 'premium_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -38,12 +40,14 @@ class SettingsScreen extends StatelessWidget {
 
           const Divider(),
 
-          // Remove Ads
+          // Subscribe to Premium
           if (!settings.isPremium)
             ListTile(
               leading: const Icon(Icons.workspace_premium, color: Colors.amber),
               title: Text(l10n.removeAds),
-              subtitle: Text(l10n.getPremium),
+              subtitle: Text(settings.locale.languageCode == 'ar'
+                  ? 'شهري \$1.99 | سنوي \$14.99'
+                  : 'Monthly \$1.99 | Yearly \$14.99'),
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const PremiumScreen()),
@@ -80,6 +84,22 @@ class SettingsScreen extends StatelessWidget {
             subtitle: const Text('vip1981.1@gmail.com'),
             onTap: () => _contactUs(),
           ),
+
+          const Divider(),
+
+          // Privacy Policy
+          ListTile(
+            leading: const Icon(Icons.privacy_tip),
+            title: Text(l10n.privacyPolicy),
+            onTap: () => _openUrl(AppConstants.privacyPolicyUrl),
+          ),
+
+          // Terms of Service
+          ListTile(
+            leading: const Icon(Icons.description),
+            title: Text(l10n.termsOfService),
+            onTap: () => _openUrl(AppConstants.termsOfServiceUrl),
+          ),
         ],
       ),
     );
@@ -90,33 +110,40 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Language / اللغة'),
-        content: RadioGroup<String>(
-          groupValue: settings.locale.languageCode,
-          onChanged: (v) {
-            settings.setLocale(Locale(v!));
-            Navigator.pop(context);
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text('English'),
-                leading: Radio<String>(value: 'en'),
-                onTap: () {
-                  settings.setLocale(const Locale('en'));
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioGroup<String>(
+              groupValue: settings.locale.languageCode,
+              onChanged: (String? value) {
+                if (value != null) {
+                  settings.setLocale(Locale(value));
                   Navigator.pop(context);
-                },
+                }
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    title: const Text('English'),
+                    leading: Radio<String>(value: 'en'),
+                    onTap: () {
+                      settings.setLocale(const Locale('en'));
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('العربية'),
+                    leading: Radio<String>(value: 'ar'),
+                    onTap: () {
+                      settings.setLocale(const Locale('ar'));
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
               ),
-              ListTile(
-                title: const Text('العربية'),
-                leading: Radio<String>(value: 'ar'),
-                onTap: () {
-                  settings.setLocale(const Locale('ar'));
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -129,8 +156,30 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _rateApp() {
-    // TODO: Add actual store links
+  void _rateApp() async {
+    final InAppReview inAppReview = InAppReview.instance;
+
+    try {
+      if (await inAppReview.isAvailable()) {
+        await inAppReview.requestReview();
+      } else {
+        // Fallback: فتح صفحة التطبيق في App Store مباشرة
+        await inAppReview.openStoreListing(appStoreId: AppConstants.appStoreId);
+      }
+    } catch (e) {
+      // Fallback إذا فشل كل شيء
+      final uri = Uri.parse('https://apps.apple.com/app/id${AppConstants.appStoreId}');
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    }
+  }
+
+  void _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   void _shareApp(AppLocalizations l10n) {

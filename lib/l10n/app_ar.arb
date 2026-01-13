@@ -41,5 +41,7 @@
   "sortBy": "ترتيب حسب",
   "dateCreated": "تاريخ الإنشاء",
   "dateModified": "تاريخ التعديل",
-  "titleAZ": "العنوان أ-ي"
+  "titleAZ": "العنوان أ-ي",
+  "privacyPolicy": "سياسة الخصوصية",
+  "termsOfService": "شروط الاستخدام"
 }

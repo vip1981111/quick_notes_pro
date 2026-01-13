@@ -33,7 +33,9 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget> {
     super.initState();
     _currentPath = widget.audioPath;
     _player.onPlayerComplete.listen((_) {
-      setState(() => _isPlaying = false);
+      if (mounted) {
+        setState(() => _isPlaying = false);
+      }
     });
   }
 
@@ -119,7 +121,7 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget> {
   Future<void> _toggleRecording() async {
     if (_isRecording) {
       final path = await _recorder.stop();
-      if (path != null) {
+      if (path != null && mounted) {
         setState(() {
           _isRecording = false;
           _currentPath = path;
@@ -127,28 +129,95 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget> {
         widget.onRecordingComplete(path);
       }
     } else {
+      // طلب الإذن مباشرة - سيظهر التنبيه إذا لم يُطلب من قبل
       final status = await Permission.microphone.request();
-      if (status.isGranted) {
-        final dir = await getApplicationDocumentsDirectory();
-        final path = '${dir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
-        await _recorder.start(
-          const RecordConfig(encoder: AudioEncoder.aacLc),
-          path: path,
-        );
-        setState(() => _isRecording = true);
+      debugPrint('Microphone permission status: $status');
+
+      if (status.isGranted) {
+        // الإذن ممنوح - ابدأ التسجيل
+        await _startRecording();
+      } else if (status.isPermanentlyDenied) {
+        // الإذن مرفوض نهائياً - افتح الإعدادات
+        if (mounted) {
+          _showPermissionDialog();
+        }
+      } else {
+        // الإذن مرفوض
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Microphone permission is required to record audio')),
+          );
+        }
       }
     }
+  }
+
+  Future<void> _startRecording() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final path = '${dir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+
+      await _recorder.start(
+        const RecordConfig(
+          encoder: AudioEncoder.aacLc,
+          bitRate: 128000,
+          sampleRate: 44100,
+        ),
+        path: path,
+      );
+      if (mounted) {
+        setState(() => _isRecording = true);
+      }
+    } catch (e) {
+      debugPrint('Recording error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Recording error: $e')),
+        );
+      }
+    }
+  }
+
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Microphone Permission'),
+        content: const Text('Please enable microphone access in Settings to record audio.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _togglePlayback() async {
     if (_isPlaying) {
       await _player.stop();
-      setState(() => _isPlaying = false);
+      if (mounted) {
+        setState(() => _isPlaying = false);
+      }
     } else {
       if (_currentPath != null) {
-        await _player.play(DeviceFileSource(_currentPath!));
-        setState(() => _isPlaying = true);
+        try {
+          await _player.play(DeviceFileSource(_currentPath!));
+          if (mounted) {
+            setState(() => _isPlaying = true);
+          }
+        } catch (e) {
+          debugPrint('Playback error: $e');
+        }
       }
     }
   }

@@ -133,4 +133,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get titleAZ => 'Title A-Z';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get termsOfService => 'Terms of Service';
 }

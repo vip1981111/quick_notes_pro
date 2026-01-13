@@ -133,4 +133,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get titleAZ => 'العنوان أ-ي';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get termsOfService => 'شروط الاستخدام';
 }

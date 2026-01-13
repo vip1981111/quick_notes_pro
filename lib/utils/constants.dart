@@ -6,8 +6,12 @@ class AppConstants {
   static const String bundleId = 'com.mohammedabdullah.quicknotespro';
 
   // Store Links
-  static const String appStoreId = '';
+  static const String appStoreId = '6757662266';
   static const String playStoreId = 'com.mohammedabdullah.quicknotespro';
+
+  // Legal Links
+  static const String privacyPolicyUrl = 'https://vip1981111.github.io/quick-notes-pro/privacy-policy.html';
+  static const String termsOfServiceUrl = 'https://vip1981111.github.io/quick-notes-pro/terms-of-service.html';
 
   // AdMob App IDs
   static const String admobAppIdIOS = 'ca-app-pub-2246849300811913~2496630733';
@@ -21,8 +25,9 @@ class AppConstants {
   static const String bannerAdUnitIdAndroid = 'ca-app-pub-2246849300811913/3314888383';
   static const String interstitialAdUnitIdAndroid = 'ca-app-pub-2246849300811913/3512847866';
 
-  // In-App Purchase
-  static const String premiumProductId = 'quick_notes_pro_premium';
+  // In-App Purchase - Subscriptions
+  static const String monthlySubscriptionId = 'quick_notes_pro_monthly';
+  static const String yearlySubscriptionId = 'quick_notes_pro_yearly';
 
   // Limits
   static const int maxFreeRecordings = 3;

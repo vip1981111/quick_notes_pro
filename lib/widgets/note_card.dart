@@ -11,7 +11,7 @@ class NoteCard extends StatelessWidget {
     required this.onTap,
   });
 
-  static const List<Color> _noteColors = [
+  final List<Color> _noteColors = const [
     Colors.white,
     Color(0xFFFFCDD2), // red.shade100
     Color(0xFFFFE0B2), // orange.shade100
@@ -24,9 +24,19 @@ class NoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = note.colorIndex != null
         ? _noteColors[note.colorIndex!]
-        : Theme.of(context).cardColor;
+        : (isDark ? Colors.grey[800] : Theme.of(context).cardColor);
+
+    // لون الخط: أسود دائماً إذا كان هناك لون خلفية، أبيض في Dark Mode بدون لون
+    final textColor = note.colorIndex != null
+        ? Colors.black87
+        : (isDark ? Colors.white : Colors.black87);
+
+    final subtitleColor = note.colorIndex != null
+        ? Colors.black54
+        : (isDark ? Colors.grey[400] : Colors.grey[600]);
 
     return Card(
       color: backgroundColor,
@@ -44,9 +54,10 @@ class NoteCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       note.title.isEmpty ? 'Untitled' : note.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: textColor,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -67,7 +78,7 @@ class NoteCard extends StatelessWidget {
                   note.content,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[700],
+                    color: subtitleColor,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -78,7 +89,7 @@ class NoteCard extends StatelessWidget {
                 _formatDate(note.modifiedAt),
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[500],
+                  color: subtitleColor,
                 ),
               ),
             ],
