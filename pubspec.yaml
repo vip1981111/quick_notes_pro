@@ -1,6 +1,6 @@
 name: quick_notes_pro
 description: Smart notes app with voice recording and cloud sync
-version: 1.0.0+2
+version: 1.0.1+5
 
 environment:
   sdk: ^3.7.0
